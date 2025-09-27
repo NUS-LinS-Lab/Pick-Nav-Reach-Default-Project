@@ -49,7 +49,7 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="fetch_description/meshes/base_link.dae"/>
+        <mesh filename="fetch_description/meshes/base_link.obj"/>
       </geometry>
     </visual>
     <collision>
@@ -126,7 +126,7 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="fetch_description/meshes/torso_lift_link.dae"/>
+        <mesh filename="fetch_description/meshes/torso_lift_link.obj"/>
       </geometry>
     </visual>
     <collision>
@@ -153,7 +153,7 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="fetch_description/meshes/head_pan_link.dae"/>
+        <mesh filename="fetch_description/meshes/head_pan_link.obj"/>
       </geometry>
     </visual>
     <collision>
@@ -179,7 +179,7 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="fetch_description/meshes/head_tilt_link.dae"/>
+        <mesh filename="fetch_description/meshes/head_tilt_link.obj"/>
       </geometry>
     </visual>
     <collision>
@@ -205,7 +205,7 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="fetch_description/meshes/shoulder_pan_link.dae"/>
+        <mesh filename="fetch_description/meshes/shoulder_pan_link.obj"/>
       </geometry>
     </visual>
     <collision>
@@ -232,7 +232,7 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="fetch_description/meshes/shoulder_lift_link.dae"/>
+        <mesh filename="fetch_description/meshes/shoulder_lift_link.obj"/>
       </geometry>
     </visual>
     <collision>
@@ -259,7 +259,7 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="fetch_description/meshes/upperarm_roll_link.dae"/>
+        <mesh filename="fetch_description/meshes/upperarm_roll_link.obj"/>
       </geometry>
     </visual>
     <collision>
@@ -286,7 +286,7 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="fetch_description/meshes/elbow_flex_link.dae"/>
+        <mesh filename="fetch_description/meshes/elbow_flex_link.obj"/>
       </geometry>
     </visual>
     <collision>
@@ -313,7 +313,7 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="fetch_description/meshes/forearm_roll_link.dae"/>
+        <mesh filename="fetch_description/meshes/forearm_roll_link.obj"/>
       </geometry>
     </visual>
     <collision>
@@ -340,7 +340,7 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="fetch_description/meshes/wrist_flex_link.dae"/>
+        <mesh filename="fetch_description/meshes/wrist_flex_link.obj"/>
       </geometry>
     </visual>
     <collision>
@@ -367,7 +367,7 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="fetch_description/meshes/wrist_roll_link.dae"/>
+        <mesh filename="fetch_description/meshes/wrist_roll_link.obj"/>
       </geometry>
     </visual>
     <collision>
@@ -394,7 +394,7 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="fetch_description/meshes/gripper_link.dae"/>
+        <mesh filename="fetch_description/meshes/gripper_link.obj"/>
       </geometry>
     </visual>
     <collision>
@@ -538,7 +538,7 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="fetch_description/meshes/estop_link.dae"/>
+        <mesh filename="fetch_description/meshes/estop_link.obj"/>
       </geometry>
     </visual>
     <collision>
@@ -592,7 +592,7 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="fetch_description/meshes/torso_fixed_link.dae"/>
+        <mesh filename="fetch_description/meshes/torso_fixed_link.obj"/>
       </geometry>
     </visual>
     <collision>

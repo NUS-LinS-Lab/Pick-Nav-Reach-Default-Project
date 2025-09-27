@@ -94,63 +94,63 @@ class KeyBoardController:
             #     self.shoulder_pan = 0
 
             # shoulder_lift
-            if (k == ord('u') and (v & p.KEY_WAS_TRIGGERED)):
+            if (k == ord('o') and (v & p.KEY_WAS_TRIGGERED)):
                 self.shoulder_lift = 1
-            if (k == ord('u') and (v & p.KEY_WAS_RELEASED)):
+            if (k == ord('o') and (v & p.KEY_WAS_RELEASED)):
                 self.shoulder_lift = 0
-            if (k == ord('j') and (v & p.KEY_WAS_TRIGGERED)):
+            if (k == ord('l') and (v & p.KEY_WAS_TRIGGERED)):
                 self.shoulder_lift = -1
-            if (k == ord('j') and (v & p.KEY_WAS_RELEASED)):
+            if (k == ord('l') and (v & p.KEY_WAS_RELEASED)):
                 self.shoulder_lift = 0
 
             # upperarm_roll
-            if (k == ord('i') and (v & p.KEY_WAS_TRIGGERED)):
-                self.upperarm_roll = 1
-            if (k == ord('i') and (v & p.KEY_WAS_RELEASED)):
-                self.upperarm_roll = 0
-            if (k == ord('k') and (v & p.KEY_WAS_TRIGGERED)):
-                self.upperarm_roll = -1
-            if (k == ord('k') and (v & p.KEY_WAS_RELEASED)):
-                self.upperarm_roll = 0
+            # if (k == ord('y') and (v & p.KEY_WAS_TRIGGERED)):
+            #     self.upperarm_roll = 1
+            # if (k == ord('y') and (v & p.KEY_WAS_RELEASED)):
+            #     self.upperarm_roll = 0
+            # if (k == ord('h') and (v & p.KEY_WAS_TRIGGERED)):
+            #     self.upperarm_roll = -1
+            # if (k == ord('h') and (v & p.KEY_WAS_RELEASED)):
+            #     self.upperarm_roll = 0
 
             # elbow_flex
-            if (k == ord('o') and (v & p.KEY_WAS_TRIGGERED)):
+            if (k == ord('u') and (v & p.KEY_WAS_TRIGGERED)):
                 self.elbow_flex = 1
-            if (k == ord('o') and (v & p.KEY_WAS_RELEASED)):
+            if (k == ord('u') and (v & p.KEY_WAS_RELEASED)):
                 self.elbow_flex = 0
-            if (k == ord('l') and (v & p.KEY_WAS_TRIGGERED)):
+            if (k == ord('j') and (v & p.KEY_WAS_TRIGGERED)):
                 self.elbow_flex = -1
-            if (k == ord('l') and (v & p.KEY_WAS_RELEASED)):
+            if (k == ord('j') and (v & p.KEY_WAS_RELEASED)):
                 self.elbow_flex = 0
 
             # forearm_roll
-            if (k == ord('p') and (v & p.KEY_WAS_TRIGGERED)):
-                self.forearm_roll = 1
-            if (k == ord('p') and (v & p.KEY_WAS_RELEASED)):
-                self.forearm_roll = 0
-            if (k == ord(';') and (v & p.KEY_WAS_TRIGGERED)):
-                self.forearm_roll = -1
-            if (k == ord(';') and (v & p.KEY_WAS_RELEASED)):
-                self.forearm_roll = 0
+            # if (k == ord('u') and (v & p.KEY_WAS_TRIGGERED)):
+            #     self.forearm_roll = 1
+            # if (k == ord('u') and (v & p.KEY_WAS_RELEASED)):
+            #     self.forearm_roll = 0
+            # if (k == ord('j') and (v & p.KEY_WAS_TRIGGERED)):
+            #     self.forearm_roll = -1
+            # if (k == ord('j') and (v & p.KEY_WAS_RELEASED)):
+            #     self.forearm_roll = 0
                 
             # wrist_flex
-            if (k == ord(']') and (v & p.KEY_WAS_TRIGGERED)):
+            if (k == ord('y') and (v & p.KEY_WAS_TRIGGERED)):
                 self.wrist_flex = 1
-            if (k == ord(']') and (v & p.KEY_WAS_RELEASED)):
+            if (k == ord('y') and (v & p.KEY_WAS_RELEASED)):
                 self.wrist_flex = 0
-            if (k == ord('[') and (v & p.KEY_WAS_TRIGGERED)):
+            if (k == ord('h') and (v & p.KEY_WAS_TRIGGERED)):
                 self.wrist_flex = -1
-            if (k == ord('[') and (v & p.KEY_WAS_RELEASED)):
+            if (k == ord('h') and (v & p.KEY_WAS_RELEASED)):
                 self.wrist_flex = 0
                 
             # wrist_roll
-            if (k == ord('.') and (v & p.KEY_WAS_TRIGGERED)):
+            if (k == ord('1') and (v & p.KEY_WAS_TRIGGERED)):
                 self.wrist_roll = 1
-            if (k == ord('.') and (v & p.KEY_WAS_RELEASED)):
+            if (k == ord('1') and (v & p.KEY_WAS_RELEASED)):
                 self.wrist_roll = 0
-            if (k == ord("/") and (v & p.KEY_WAS_TRIGGERED)):
+            if (k == ord("2") and (v & p.KEY_WAS_TRIGGERED)):
                 self.wrist_roll = -1
-            if (k == ord("/") and (v & p.KEY_WAS_RELEASED)):
+            if (k == ord("2") and (v & p.KEY_WAS_RELEASED)):
                 self.wrist_roll = 0
 
             # gripper

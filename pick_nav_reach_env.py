@@ -11,7 +11,7 @@ class PickNavReachEnv:
 
     def __init__(self, 
                  seed=0,
-                 object_idx=0,
+                 object_idx=5,
                  ):
         self.set_seed(seed)
 
@@ -38,20 +38,21 @@ class PickNavReachEnv:
         random.seed(seed)
     
     def _load_scene(self):
-        # self._load_agent()
+        self._load_agent()
         self._load_object_table()
         self._load_maze()
+        self._load_object_goal()
 
     def _load_agent(self):
         # Place the Fetch base near the table
-        base_pos = [0.0, 0.0, 0.0]
+        base_pos = [-2, 0.0, 0.0]
         base_ori = p.getQuaternionFromEuler([0, 0, 0])
         self.robot_id = p.loadURDF(
-            "fetch/fetch.urdf",
+            "assets/fetch/fetch.urdf",
             base_pos,
             base_ori,
             useFixedBase=True,
-            flags=p.URDF_USE_SELF_COLLISION,
+            flags=p.URDF_USE_SELF_COLLISION | p.URDF_USE_SELF_COLLISION_EXCLUDE_ALL_PARENTS,
         )
 
         # Collect joint info (skip fixed)
@@ -69,9 +70,8 @@ class PickNavReachEnv:
                 ranges.append(info[9] - info[8])
                 rest.append(info[10])  # joint damping? (PyBullet packs different things; we keep a placeholder)
 
-                # Disable default motors to allow POSITION_CONTROL commands
                 p.setJointMotorControl2(
-                    self.robot_id, j, p.VELOCITY_CONTROL, force=0.0
+                    self.robot_id, j, p.VELOCITY_CONTROL, force=0.0,
                 )
 
         self.joint_indices = indices
@@ -84,23 +84,21 @@ class PickNavReachEnv:
         # self.joint_upper[self.joint_upper==-1] = np.inf
         # self.joint_ranges[self.joint_upper==np.inf] = np.inf
         
-        print("Controllable joints:", len(self.joint_indices))
-        print("Joint Indices:", self.joint_indices)
-        print("Joint Lower:", self.joint_lower)
-        print("Joint Upper:", self.joint_upper)
+        # print("Controllable joints:", len(self.joint_indices))
+        # print("Joint Indices:", self.joint_indices)
+        # print("Joint Lower:", self.joint_lower)
+        # print("Joint Upper:", self.joint_upper)
 
-        # # Try to set a sane initial configuration (elbow up, etc.) if limits known
-        # q0 = np.clip(
-        #     np.array([
-        #         0.0, -1.2, 1.2, -1.0, 0.0, 1.0, 0.5  # a typical 7-DoF arm seed (adjust to your Fetch URDF)
-        #     ] + [0.0] * (len(self.joint_indices) - 7),
-        #     self.joint_lower,
-        #     self.joint_upper,
-        # ))
-        # self._set_qpos(q0)
+        # Set an initial configuration
+        self.q0 = np.clip(
+            np.array([0.0] * len(self.joint_indices)),
+            self.joint_lower,
+            self.joint_upper,
+        )
+        self._set_qpos(self.q0)
 
     def _load_object_table(self):
-
+        p.setAdditionalSearchPath(pybullet_data.getDataPath()) 
         p.loadURDF("table/table.urdf", baseOrientation=p.getQuaternionFromEuler([0,0,np.pi/2]), useFixedBase=1)
 
         # hyperparameters
@@ -108,22 +106,27 @@ class PickNavReachEnv:
         ycb_objects_paths = sorted(list(Path(ycb_object_dir_path).glob("*")))
         assert 0 <= self.object_idx and self.object_idx < len(ycb_objects_paths), f"object_idx should be in [0, {len(ycb_objects_paths)-1}]"
         object_urdf_path = (ycb_objects_paths[self.object_idx] / "coacd_decomposed_object_one_link.urdf").absolute()
-        p.setAdditionalSearchPath(str(object_urdf_path.parent) )
-        p.loadURDF(str(object_urdf_path), basePosition=[0, 0, 5.0], useFixedBase=0)
-
-
-    def _load_object_table(self):
-
-        p.loadURDF("table/table.urdf", baseOrientation=p.getQuaternionFromEuler([0,0,np.pi/2]), useFixedBase=1)
-
-        # hyperparameters
-        ycb_object_dir_path = "./assets/ycb_objects/"
-        ycb_objects_paths = sorted(list(Path(ycb_object_dir_path).glob("*")))
-        assert 0 <= self.object_idx and self.object_idx < len(ycb_objects_paths), f"object_idx should be in [0, {len(ycb_objects_paths)-1}]"
-        object_urdf_path = (ycb_objects_paths[self.object_idx] / "coacd_decomposed_object_one_link.urdf").absolute()
-        p.setAdditionalSearchPath(str(object_urdf_path.parent) )
-        p.loadURDF(str(object_urdf_path), basePosition=[0, 0, 5.0], useFixedBase=0)
-
+        self.object_id = p.loadURDF(str(object_urdf_path), basePosition=[0, 0, 1.0], useFixedBase=0)
+    
+    def _load_object_goal(self, ):
+        pos = [self.maze_out_pos_x, self.maze_out_pos_y, 0.0]
+        radius = 0.05
+        rgba = (0.0, 1.0, 0.0, 0.9)
+        vs = p.createVisualShape(
+            shapeType=p.GEOM_SPHERE,
+            radius=radius,
+            rgbaColor=rgba,
+            visualFramePosition=[0, 0, 0],
+        )
+        self.goal_marker_id = p.createMultiBody(
+            baseMass=0.0,
+            baseCollisionShapeIndex=-1,
+            baseVisualShapeIndex=vs,
+            basePosition=pos,
+            baseOrientation=[0, 0, 0, 1],
+            useMaximalCoordinates=True,
+        )
+        p.setCollisionFilterGroupMask(self.goal_marker_id, -1, 0, 0)
 
     def _load_maze(self):
         # maze hyperparameters
@@ -138,6 +141,9 @@ class PickNavReachEnv:
         random_row_out = np.random.randint(1, n_rows-1) 
         in_pos = (random_row_in, 0)
         out_pos = (random_row_out, n_cols-1)
+        
+        self.maze_out_pos_x = n_cols * grid_xy - grid_xy / 2 + maze_offset
+        self.maze_out_pos_y = n_rows / 2 * grid_xy - out_pos[0] * grid_xy - grid_xy / 2
 
         maze = generate_maze_map(
             n_rows=n_rows, n_cols=n_cols,
@@ -182,13 +188,25 @@ class PickNavReachEnv:
         print("target: ", target)
 
         # Position control for all controllable joints
+        # position_gains = [0.3, 0.3, 0.3,  # base movement: xy trans and z rot 
+        #                    0.3, # torso lift 
+        #                    0.3, 0.3, # head pan & tilt
+        #                    1.0, 1.0, # shoulder pan & lift
+        #                    0.3, 0.3, 0.3, 0.3, 0.3, # arm 
+        #                    0.3, 0.3] # gripper
+        position_gains = np.array([0.3] * len(self.joint_indices))
+        velocity_gains = np.zeros_like(position_gains) #np.sqrt(np.array(position_gains))
         p.setJointMotorControlArray(
             bodyUniqueId=self.robot_id,
             jointIndices=self.joint_indices,
             controlMode=p.POSITION_CONTROL,
+            # controlMode=p.PD_CONTROL,
             targetPositions=target.tolist(),
+            # targetVelocities=[0.0] * len(self.joint_indices),
             forces=[self.max_force] * len(self.joint_indices),
-            positionGains=[0.3] * len(self.joint_indices),
+            # positionGains=[0.3] * len(self.joint_indices),
+            positionGains=position_gains,
+            # velocityGains=velocity_gains,
         )
 
         for _ in range(self.substeps):
@@ -203,6 +221,13 @@ class PickNavReachEnv:
         info = {}
 
         return obs, reward, terminated, truncated, info
+    
+    def reset(self):
+        """Reset the simulation and reload world/robot. Returns initial observation."""
+        self._set_qpos(self.q0)
+        p.resetBasePositionAndOrientation(self.object_id, [0, 0, 5.0], [0, 0, 0, 1])
+
+        return self._get_obs()
     
     def _get_obs(self):
         qpos, qvel = self._get_state()
@@ -233,18 +258,19 @@ class PickNavReachEnv:
 
 if __name__ == "__main__":
     env = PickNavReachEnv(seed=42)
+    env.reset()
     # print(f"Action size: {env.action_size}, Obs size: {env.obs_size}")
     
-    # keyboard_controller = KeyBoardController(env)
+    keyboard_controller = KeyBoardController(env)
 
     # for i in range (10000):
     import time
     while True:
         # random_action = np.random.uniform(-1.0, 1.0, size=(env.action_size,))
-        # action = keyboard_controller.get_action()
+        action = keyboard_controller.get_action()
         # print("action: ", action)
-        # obs, reward, terminated, truncated, info = env.step(action)
-        p.stepSimulation()
-        time.sleep(1./240.)
+        obs, reward, terminated, truncated, info = env.step(action)
+        # p.stepSimulation()
+        # time.sleep(1./240.)
 
 
