@@ -9,6 +9,8 @@ In this project, the task is to:
 
 We provide an environment code for the robot in `pick_nav_reach.py`.
 
+![Scene](imgs/scene.png)
+
 # Requirement
 
 You should implement the grasp generation, motion planning, and navigation algorithms by yourself to accomplish the task.
