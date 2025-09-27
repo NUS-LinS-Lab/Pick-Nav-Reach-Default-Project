@@ -43,3 +43,6 @@ git clone https://github.com/NUS-LinS-Lab/Pick-Nav-Reach-Default-Project.git
 
 - [PyBullet Quickstart Guide](https://docs.google.com/document/d/10sXEhzFRSnvFcl3XxNGhnD4N2SedqwdAvK3dsihxVUA/edit?tab=t.0#heading=h.2ye70wns7io3).
 
+# Acknowledgments
+
+- YCB object models are chosen and adapted from [here](https://www.ycbbenchmarks.com/).

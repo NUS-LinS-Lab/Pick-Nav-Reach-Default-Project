@@ -1,0 +1,6 @@
+newmtl material_0
+Ka 1.0 1.0 1.0       # ambient term (boost)
+Kd 1.0 1.0 1.0       # diffuse (set full white so texture shows as-is)
+Ks 1.0 1.0 1.0       # specular (optional, PyBullet ignores most)
+Ns 1.0
+map_Kd texture_map.png
