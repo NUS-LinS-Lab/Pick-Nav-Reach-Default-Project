@@ -3,6 +3,7 @@ import pybullet as p
 import pybullet_data
 import numpy as np
 import random 
+import trimesh 
 from pathlib import Path
 from maze_utils import generate_maze_map, add_left_room_to_maze, create_maze_urdf
 from keyboard_control import KeyBoardController
@@ -30,7 +31,8 @@ class PickNavReachEnv:
         self.action_scale = 0.05
         self.max_force = 2000000
         self.substeps = 20
-
+        self.debug_point_id = None
+        self.debug_line_ids = []
         self._load_scene()
 
     def set_seed(self, seed):
@@ -106,7 +108,12 @@ class PickNavReachEnv:
         ycb_objects_paths = sorted(list(Path(ycb_object_dir_path).glob("*")))
         assert 0 <= self.object_idx and self.object_idx < len(ycb_objects_paths), f"object_idx should be in [0, {len(ycb_objects_paths)-1}]"
         object_urdf_path = (ycb_objects_paths[self.object_idx] / "coacd_decomposed_object_one_link.urdf").absolute()
+        object_mesh_path = (ycb_objects_paths[self.object_idx] / "textured.obj").absolute()
         self.object_id = p.loadURDF(str(object_urdf_path), basePosition=[0, 0, 1.0], useFixedBase=0)
+        self.object_canonical_mesh = trimesh.load(str(object_mesh_path))
+        object_canonical_pc, face_indices = trimesh.sample.sample_surface(self.object_canonical_mesh, 1024)
+        self.object_canonical_pc = object_canonical_pc.astype(np.float32)  # (1024, 3)
+        self.object_canonical_normals = self.object_canonical_mesh.face_normals[face_indices].astype(np.float32)  # (1024, 3), outward normals
     
     def _load_object_goal(self, ):
         pos = [self.maze_out_pos_x, self.maze_out_pos_y, 0.0]
@@ -169,6 +176,31 @@ class PickNavReachEnv:
 
         p.loadURDF("./assets/maze.urdf", useFixedBase=1, flags=p.URDF_MERGE_FIXED_LINKS)
         
+    def visualize_pc_and_normals(self, object_pc, object_normals, visualize_normals=False):
+        # remove old debug items
+        if self.debug_point_id is not None:
+            p.removeUserDebugItem(self.debug_point_id)
+        for lid in self.debug_line_ids:
+            p.removeUserDebugItem(lid)
+        self.debug_line_ids.clear()
+
+        # add new point cloud
+        self.debug_point_id = p.addUserDebugPoints(
+            pointPositions=object_pc.tolist(),
+            pointColorsRGB=[[0, 0, 1]] * object_pc.shape[0],
+            pointSize=2.0,
+            lifeTime=0
+        )
+
+        # add normals, this may slow down the simulation
+        if visualize_normals:
+            normal_scale = 0.02
+            for i in range(0, object_pc.shape[0], 50):  # e.g. subsample
+                start = object_pc[i]
+                end = object_pc[i] + normal_scale * object_normals[i]
+                lid = p.addUserDebugLine(start, end, [1, 0, 0], 1.5, 0)
+                self.debug_line_ids.append(lid)
+
     def step(self, action):
         """
         Apply action (delta q) then simulate for `substeps`.
@@ -231,7 +263,20 @@ class PickNavReachEnv:
     
     def _get_obs(self):
         qpos, qvel = self._get_state()
-        return np.concatenate([qpos, qvel], axis=0).astype(np.float32)
+
+        # get object point cloud and normals in world frame
+        object_pos, object_xyzw = p.getBasePositionAndOrientation(self.object_id)
+        object_rot = np.array(p.getMatrixFromQuaternion(object_xyzw)).reshape(3, 3) 
+        object_pc = (self.object_canonical_pc @ object_rot.T) + np.array(object_pos, dtype=np.float32).reshape(1, 3)  # (1024, 3)
+        object_normals = (self.object_canonical_normals @ object_rot.T)  # (1024, 3), outward normals
+
+        # self.visualize_pc_and_normals(object_pc, object_normals, visualize_normals=False)
+        return {
+            "qpos": qpos,
+            "qvel": qvel,
+            "object_pc": object_pc,
+            "object_normals": object_normals,
+        }
 
     def _get_state(self):
         states = p.getJointStates(self.robot_id, self.joint_indices)

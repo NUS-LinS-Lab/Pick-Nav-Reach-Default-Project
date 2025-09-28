@@ -2012,6 +2012,36 @@
   </joint>
 
 
+  <link name="block_7_6">
+    <visual>
+      <origin xyz="0 0 0"/>
+      <geometry>
+        <box size="1.0 1.0 2.0"/>
+      </geometry>
+      <material name="wall">
+        <color rgba="0.95 0.95 0.98 1.0"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0"/>
+      <geometry>
+        <box size="1.0 1.0 2.0"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <mass value="0"/> <!-- static -->
+      <inertia ixx="0" iyy="0" izz="0" ixy="0" ixz="0" iyz="0"/>
+    </inertial>
+  </link>
+
+
+  <joint name="joint_block_7_6" type="fixed">
+    <parent link="maze_base"/>
+    <child link="block_7_6"/>
+    <origin xyz="2.5 -1.5 1.0" rpy="0 0 0"/>
+  </joint>
+
+
   <link name="block_7_9">
     <visual>
       <origin xyz="0 0 0"/>
@@ -2759,36 +2789,6 @@
     <parent link="maze_base"/>
     <child link="block_9_0"/>
     <origin xyz="-3.5 -3.5 1.0" rpy="0 0 0"/>
-  </joint>
-
-
-  <link name="block_9_6">
-    <visual>
-      <origin xyz="0 0 0"/>
-      <geometry>
-        <box size="1.0 1.0 2.0"/>
-      </geometry>
-      <material name="wall">
-        <color rgba="0.95 0.95 0.98 1.0"/>
-      </material>
-    </visual>
-    <collision>
-      <origin xyz="0 0 0"/>
-      <geometry>
-        <box size="1.0 1.0 2.0"/>
-      </geometry>
-    </collision>
-    <inertial>
-      <mass value="0"/> <!-- static -->
-      <inertia ixx="0" iyy="0" izz="0" ixy="0" ixz="0" iyz="0"/>
-    </inertial>
-  </link>
-
-
-  <joint name="joint_block_9_6" type="fixed">
-    <parent link="maze_base"/>
-    <child link="block_9_6"/>
-    <origin xyz="2.5 -3.5 1.0" rpy="0 0 0"/>
   </joint>
 
 
