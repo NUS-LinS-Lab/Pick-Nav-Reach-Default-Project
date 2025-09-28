@@ -94,6 +94,7 @@ Evaluate on 5 test mazes while carrying the object toward the green goal sphere.
 
 ```
 conda create -n pnr python==3.10
+conda activate pnr
 ```
 
 2. Our environment is build on [PyBullet](https://pybullet.org/wordpress/index.php/forum-2/). Install it with pip:
