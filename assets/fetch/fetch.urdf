@@ -426,9 +426,9 @@
       </material>
     </visual>
     <collision>
-      <origin rpy="0 0 0" xyz="0 0.101425 0"/>
+      <origin rpy="0 0 0" xyz="0 -0.008 0"/>
       <geometry>
-        <mesh filename="fetch_description/meshes/r_gripper_finger_link.STL"/>
+        <box size="0.063 0.012 0.024"/>
       </geometry>
     </collision>
   </link>
@@ -456,9 +456,9 @@
       </material>
     </visual>
     <collision>
-      <origin rpy="0 0 0" xyz="0 -0.101425 0"/>
+      <origin rpy="0 0 0" xyz="0 0.008 0"/>
       <geometry>
-        <mesh filename="fetch_description/meshes/l_gripper_finger_link.STL"/>
+        <box size="0.063 0.012 0.024"/>
       </geometry>
     </collision>
   </link>

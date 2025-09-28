@@ -62,7 +62,7 @@ class PickNavReachEnv:
             base_pos,
             base_ori,
             useFixedBase=True,
-            flags=p.URDF_USE_SELF_COLLISION | p.URDF_USE_SELF_COLLISION_EXCLUDE_ALL_PARENTS,
+            # flags=p.URDF_USE_SELF_COLLISION | p.URDF_USE_SELF_COLLISION_EXCLUDE_ALL_PARENTS,
         )
 
         # Collect joint info (skip fixed)
