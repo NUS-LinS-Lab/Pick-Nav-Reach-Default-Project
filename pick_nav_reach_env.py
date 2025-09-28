@@ -300,7 +300,6 @@ class PickNavReachEnv:
         dist_to_goal = np.linalg.norm(object_pos - self.goal_pos)
         success = dist_to_goal < 0.1
 
-        breakpoint()
         return {
             "dist_to_goal": dist_to_goal,
             "success": success,
