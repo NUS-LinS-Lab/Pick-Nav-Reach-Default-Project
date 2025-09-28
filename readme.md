@@ -114,7 +114,7 @@ git clone https://github.com/NUS-LinS-Lab/Pick-Nav-Reach-Default-Project.git
 
 You should replace the `keyboard_controller` with a customized module designed by yourselves and then use `env.step()` to controll the robot to complete the task.
 
-`env.step()` takes in a `numpy.ndarray` of shape (15,) where 15 is the number of DoFs of the Fetch robot. The observation and extra information will be returned in python dictionaries as follows:
+`env.step()` takes in a `numpy.ndarray` of shape (15,) as **action**, where 15 is the number of DoFs of the Fetch robot. The **observation** and **extra information** will be returned in python dictionaries as follows:
 
 ```python
 # key_name: value_type, value_size

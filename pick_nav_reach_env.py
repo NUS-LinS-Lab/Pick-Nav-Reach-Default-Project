@@ -211,9 +211,28 @@ class PickNavReachEnv:
 
     def step(self, action):
         """
-        Apply action (absolute joint values) then simulate for `substeps`.
-        action: shape (n_dofs,) will be clipped to joint limits before applying
-        Returns: obs, reward, terminated, truncated, info
+        Apply an action (absolute joint values) and simulate for `substeps`.
+
+        Notes
+        -----
+        - `action` is interpreted as *target joint positions* in the same order
+        as `self.joint_indices`.
+        - Targets are wrapped for revolute joints marked by `wrap_mask`
+        (here: joints whose `joint_upper == 314`, i.e., 314 rad ~ sentinel for wrap),
+        then hard-clipped to joint limits.
+        - Position control is used with per-joint gains and a shared max force.
+
+        Parameters
+        ----------
+        action : array-like, shape (n_dofs,)
+            Absolute joint targets for the controllable DOFs.
+
+        Returns
+        -------
+        obs : dict
+            Observation returned by `_get_obs()`.
+        info : dict
+            Evaluation metrics returned by `evaluate()`.
         """
         action = np.asarray(action, dtype=np.float32).reshape(-1)
         n = len(self.joint_indices)
