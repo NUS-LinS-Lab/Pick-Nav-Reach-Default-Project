@@ -15,7 +15,7 @@ We provide an environment code for the robot in `pick_nav_reach.py`.
 
 You should implement the grasp generation, motion planning, and navigation algorithms by yourself to accomplish the task.
 
-# Rubric (TODO)
+# Rubric
 
 We evaluate your algorithms in the following three aspects with 5 Unprovided seeds:
 
@@ -25,7 +25,7 @@ We evaluate your algorithms in the following three aspects with 5 Unprovided see
 
 - Navigation: 5 test mazes.
 
-Unless otherwise stated: placement tolerance = **5 cm**
+Unless otherwise stated: placement tolerance = **10 cm**
 
 ## Grasp Generation (40%)
 
@@ -54,7 +54,7 @@ From the selected grasps above, perform IK + motion planning to execute pre-gras
 
 For each trial, award the following (sum; then average across trials):
 
-- Lift within 300 sim steps — 5 pts
+- Lift within 3000 sim steps — 5 pts
 
 - Lift height ≥ 10 cm above table — 5 pts
 
@@ -62,13 +62,15 @@ For each trial, award the following (sum; then average across trials):
 
 - Final pose close to target grasp — 5 pts
 
+![Scene](imgs/success_grasp.png)
+
 ## Navigation (40%)
 
 Evaluate on 5 test mazes while carrying the object toward the green goal sphere.
 
 - Delivery to Goal — 30 pts
 
-    Scoring per trial: reach within 5 cm of the goal sphere while still holding the object → 6 pts.
+    Scoring per trial: reach within 10 cm of the goal sphere while still holding the object → 6 pts.
 
 - Collision Count — 5 pts
 
@@ -84,15 +86,23 @@ Evaluate on 5 test mazes while carrying the object toward the green goal sphere.
 
     Scoring per trial: no drop that requires re-grasp during navigation → 1 pt each; sum over 5 trials (max 5).
 
+![Scene](imgs/success_navigation.png)
+
 # Installation
 
-1. Our environment is build on [PyBullet](https://pybullet.org/wordpress/index.php/forum-2/). Install it with pip:
+1. Create a conda environment using `Python 3.10`.
+
+```
+conda create -n pnr python==3.10
+```
+
+2. Our environment is build on [PyBullet](https://pybullet.org/wordpress/index.php/forum-2/). Install it with pip:
 
 ```
 pip3 install pybullet numpy matplotlib trimesh
 ```
 
-2. Clone the project repo:
+3. Clone the project repo:
 
 ```
 git clone https://github.com/NUS-LinS-Lab/Pick-Nav-Reach-Default-Project.git
@@ -100,7 +110,30 @@ git clone https://github.com/NUS-LinS-Lab/Pick-Nav-Reach-Default-Project.git
 
 # Run the Environment 
 
-`python run.py`
+`python pick_nav_reach_env.py`
+
+You should replace the `keyboard_controller` with a customized module designed by yourselves and then use `env.step()` to controll the robot to complete the task.
+
+`env.step()` takes in a `numpy.ndarray` of shape (15,) where 15 is the number of DoFs of the Fetch robot. The observation and extra information will be returned in python dictionaries as follows:
+
+```python
+# key_name: value_type, value_size
+
+# observation dict
+qpos: <class 'numpy.ndarray'>, (15,) # (num_dofs,)
+qvel: <class 'numpy.ndarray'>, (15,) # (num_dofs,)
+object_pos: <class 'numpy.ndarray'>, (3,) # position
+object_xyzw: <class 'numpy.ndarray'>, (4,) # quaternion xyzw
+goal_pos: <class 'numpy.ndarray'>, (3,) # position
+object_pc: <class 'trimesh.caching.TrackedArray'>, (1024, 3) # (num_points, position)
+object_normals: <class 'numpy.ndarray'>, (1024, 3) # (num_points, direction)
+cube_positions: <class 'numpy.ndarray'>, (140, 2) # (num_cubes, xy_position)
+
+# info dict
+dist_to_goal: <class 'numpy.float64'>, () # < 0.1 means success
+success: <class 'numpy.bool'>, () # success or not
+
+```
 
 # References
 

@@ -124,7 +124,7 @@ class PickNavReachEnv:
         self.object_canonical_normals = self.object_canonical_mesh.face_normals[face_indices].astype(np.float32)  # (1024, 3), outward normals
     
     def _load_object_goal(self, ):
-        pos = [self.maze_out_pos_x, self.maze_out_pos_y, 0.0]
+        self.goal_pos = np.array([self.maze_out_pos_x, self.maze_out_pos_y, 0.9])
         radius = 0.05
         rgba = (0.0, 1.0, 0.0, 0.9)
         vs = p.createVisualShape(
@@ -137,7 +137,7 @@ class PickNavReachEnv:
             baseMass=0.0,
             baseCollisionShapeIndex=-1,
             baseVisualShapeIndex=vs,
-            basePosition=pos,
+            basePosition=self.goal_pos,
             baseOrientation=[0, 0, 0, 1],
             useMaximalCoordinates=True,
         )
@@ -235,13 +235,13 @@ class PickNavReachEnv:
         print("target: ", target)
 
         # Position control for all controllable joints
-        # position_gains = [0.3, 0.3, 0.3,  # base movement: xy trans and z rot 
-        #                    0.3, # torso lift 
-        #                    0.3, 0.3, # head pan & tilt
-        #                    1.0, 1.0, # shoulder pan & lift
-        #                    0.3, 0.3, 0.3, 0.3, 0.3, # arm 
-        #                    0.3, 0.3] # gripper
-        position_gains = np.array([0.3] * len(self.joint_indices))
+        position_gains = [0.3, 0.3, 0.3,  # base movement: xy trans and z rot 
+                           0.3, # torso lift 
+                           0.3, 0.3, # head pan & tilt
+                           0.3, 0.3, # shoulder pan & lift
+                           0.3, 0.3, 0.3, 0.3, 0.3, # arm 
+                           0.03, 0.03] # gripper
+        # position_gains = np.array([0.3] * len(self.joint_indices))
         velocity_gains = np.zeros_like(position_gains) #np.sqrt(np.array(position_gains))
         p.setJointMotorControlArray(
             bodyUniqueId=self.robot_id,
@@ -262,12 +262,9 @@ class PickNavReachEnv:
 
         obs = self._get_obs()
 
-        reward = 0.0
-        terminated = False
-        truncated = False
-        info = {}
+        info = self.evaluate()
 
-        return obs, reward, terminated, truncated, info
+        return obs, info
     
     def reset(self):
         """Reset the simulation and reload world/robot. Returns initial observation."""
@@ -275,6 +272,20 @@ class PickNavReachEnv:
         p.resetBasePositionAndOrientation(self.object_id, [0, 0, 5.0], [0, 0, 0, 1])
 
         return self._get_obs()
+    
+    def evaluate(self):
+        """
+        Evaluate distance between the object position and the goal position.
+        """
+        _, _, object_pos, _ = self._get_state()
+        dist_to_goal = np.linalg.norm(object_pos - self.goal_pos)
+        success = dist_to_goal < 0.1
+
+        breakpoint()
+        return {
+            "dist_to_goal": dist_to_goal,
+            "success": success,
+        }
     
     def _get_object_obs(self):
         object_pos, object_xyzw = p.getBasePositionAndOrientation(self.object_id)
@@ -299,6 +310,7 @@ class PickNavReachEnv:
             "qvel": deepcopy(qvel),
             "object_pos": deepcopy(object_pos),
             "object_xyzw": deepcopy(object_xyzw),
+            "goal_pos": deepcopy(self.goal_pos),
             "object_pc": deepcopy(object_obs["object_pc"]),
             "object_normals": deepcopy(object_obs["object_normals"]),
             "cube_positions": deepcopy(self.cube_positions[:, :2]),
@@ -352,7 +364,9 @@ if __name__ == "__main__":
     while True:
         # random_action = np.random.uniform(-1.0, 1.0, size=(env.action_size,))
         action = keyboard_controller.get_action()
-        obs, reward, terminated, truncated, info = env.step(action)
+        obs, info = env.step(action)
+        for k, v in info.items():
+            print(f"{k}: {v}")
         # p.stepSimulation()
         # time.sleep(1./240.)
 
