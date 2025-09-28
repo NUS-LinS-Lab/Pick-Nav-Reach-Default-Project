@@ -272,6 +272,8 @@ def create_maze_urdf(
         '  <link name="maze_base"/>',   # single root link
     ]
 
+    cube_positions = []
+
     for i in range(n_rows):
         for j in range(n_cols):
             if maze_map[i][j] == 1:
@@ -316,6 +318,7 @@ def create_maze_urdf(
 
                 urdf_parts.append(link)
                 urdf_parts.append(joint)
+                cube_positions.append((world_x, world_y, world_z))
 
     urdf_parts.append("</robot>")
     urdf_str = "\n".join(urdf_parts)
@@ -324,7 +327,8 @@ def create_maze_urdf(
     with open(urdf_path, "w") as f:
         f.write(urdf_str)
 
-    return urdf_path
+    cube_positions = np.array(cube_positions) if len(cube_positions) else None
+    return cube_positions
 
 
 if __name__ == "__main__":

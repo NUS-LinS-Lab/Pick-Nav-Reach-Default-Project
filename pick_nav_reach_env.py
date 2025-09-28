@@ -6,6 +6,7 @@ import random
 import trimesh 
 from pathlib import Path
 from maze_utils import generate_maze_map, add_left_room_to_maze, create_maze_urdf
+from copy import deepcopy
 from keyboard_control import KeyBoardController
 
 class PickNavReachEnv:
@@ -164,7 +165,7 @@ class PickNavReachEnv:
 
         maze = add_left_room_to_maze(maze, room_width=room_width)
 
-        create_maze_urdf(
+        self.cube_positions = create_maze_urdf(
             maze, 
             urdf_path="./assets/maze.urdf",
             grid_xy=grid_xy, grid_z=grid_z,
@@ -261,21 +262,30 @@ class PickNavReachEnv:
 
         return self._get_obs()
     
-    def _get_obs(self):
-        qpos, qvel = self._get_state()
-
-        # get object point cloud and normals in world frame
+    def _get_object_obs(self):
         object_pos, object_xyzw = p.getBasePositionAndOrientation(self.object_id)
         object_rot = np.array(p.getMatrixFromQuaternion(object_xyzw)).reshape(3, 3) 
         object_pc = (self.object_canonical_pc @ object_rot.T) + np.array(object_pos, dtype=np.float32).reshape(1, 3)  # (1024, 3)
         object_normals = (self.object_canonical_normals @ object_rot.T)  # (1024, 3), outward normals
+        return {
+            "object_pc": object_pc,
+            "object_normals": object_normals,
+        }
+    
+    def _get_maze_obs(self):
+        pass
+    
+    def _get_obs(self):
+        qpos, qvel = self._get_state()
+        object_obs = self._get_object_obs()
 
         # self.visualize_pc_and_normals(object_pc, object_normals, visualize_normals=False)
         return {
-            "qpos": qpos,
-            "qvel": qvel,
-            "object_pc": object_pc,
-            "object_normals": object_normals,
+            "qpos": deepcopy(qpos),
+            "qvel": deepcopy(qvel),
+            "object_pc": deepcopy(object_obs["object_pc"]),
+            "object_normals": deepcopy(object_obs["object_normals"]),
+            "cube_positions": deepcopy(self.cube_positions[:, :2]),
         }
 
     def _get_state(self):
