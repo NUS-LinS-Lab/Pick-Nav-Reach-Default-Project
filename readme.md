@@ -89,7 +89,7 @@ Evaluate on 5 test mazes while carrying the object toward the green goal sphere.
 1. Our environment is build on [PyBullet](https://pybullet.org/wordpress/index.php/forum-2/). Install it with pip:
 
 ```
-pip3 install pybullet numpy matplotlib
+pip3 install pybullet numpy matplotlib trimesh
 ```
 
 2. Clone the project repo:

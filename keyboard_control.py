@@ -5,7 +5,12 @@ import pybullet as p
 class KeyBoardController:
     def __init__(self, env):
         self.env = env
-        self.action = np.zeros(self.env.action_size)
+        self.action = env.agent_qpos # np.zeros(self.env.action_size)
+        self.action_scale = np.array([0.01] * env.action_size)
+        self.action_scale[:3] = 0.02  # root movement
+        self.action_scale[-2:] = 0.005  # gripper
+        self.action_upper_bound = env.joint_upper
+        self.action_lower_bound = env.joint_lower
         self.turn = 0
         self.forward = 0
         self.yaw = 0
@@ -154,17 +159,19 @@ class KeyBoardController:
                 self.wrist_roll = 0
 
             # gripper
-            if (k == ord('q') and (v & p.KEY_WAS_TRIGGERED)):
+            if (k == ord('3') and (v & p.KEY_WAS_TRIGGERED)):
                 self.gripper_open = -1
-            if (k == ord('q') and (v & p.KEY_WAS_RELEASED)):
+            if (k == ord('3') and (v & p.KEY_WAS_RELEASED)):
                 self.gripper_open = 0
-            if (k == ord('e') and (v & p.KEY_WAS_TRIGGERED)):
+            if (k == ord('4') and (v & p.KEY_WAS_TRIGGERED)):
                 self.gripper_open = 1
-            if (k == ord('e') and (v & p.KEY_WAS_RELEASED)):
+            if (k == ord('4') and (v & p.KEY_WAS_RELEASED)):
                 self.gripper_open = 0
 
-        self.action[:] = [self.forward, self.turn, self.yaw, self.torso_lift, self.head_pan, self.head_tilt, self.shoulder_pan, self.shoulder_lift, self.upperarm_roll, self.elbow_flex, self.forearm_roll, self.wrist_flex, self.wrist_roll, self.gripper_open, self.gripper_open]
-
+        unit_action = [self.forward, self.turn, self.yaw, self.torso_lift, self.head_pan, self.head_tilt, self.shoulder_pan, self.shoulder_lift, self.upperarm_roll, self.elbow_flex, self.forearm_roll, self.wrist_flex, self.wrist_roll, self.gripper_open, self.gripper_open]
+        print("unit_action: ", unit_action)
+        self.action = self.action + self.action_scale * np.array(unit_action)
+        
     def get_action(self):
         self.key_callback()
-        return np.clip(self.action, -1.0, 1.0)
+        return np.clip(self.action, self.action_lower_bound, self.action_upper_bound)

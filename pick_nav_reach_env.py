@@ -8,6 +8,7 @@ from pathlib import Path
 from maze_utils import generate_maze_map, add_left_room_to_maze, create_maze_urdf
 from copy import deepcopy
 from keyboard_control import KeyBoardController
+from utils import closest_joint_values
 
 class PickNavReachEnv:
 
@@ -31,10 +32,16 @@ class PickNavReachEnv:
         
         self.action_scale = 0.05
         self.max_force = 2000000
-        self.substeps = 20
+        self.substeps = 5
         self.debug_point_id = None
         self.debug_line_ids = []
         self._load_scene()
+        
+        # get initial observation
+        self.obs = self._get_obs()
+        
+        self.step_count = 0
+        
 
     def set_seed(self, seed):
         np.random.seed(seed)
@@ -93,12 +100,12 @@ class PickNavReachEnv:
         # print("Joint Upper:", self.joint_upper)
 
         # Set an initial configuration
-        self.q0 = np.clip(
+        self.init_qpos = np.clip(
             np.array([0.0] * len(self.joint_indices)),
             self.joint_lower,
             self.joint_upper,
         )
-        self._set_qpos(self.q0)
+        self._set_qpos(self.init_qpos)
 
     def _load_object_table(self):
         p.setAdditionalSearchPath(pybullet_data.getDataPath()) 
@@ -204,8 +211,8 @@ class PickNavReachEnv:
 
     def step(self, action):
         """
-        Apply action (delta q) then simulate for `substeps`.
-        action: shape (n_dofs,) in [-1, 1] -> scaled by action_scale
+        Apply action (absolute joint values) then simulate for `substeps`.
+        action: shape (n_dofs,) will be clipped to joint limits before applying
         Returns: obs, reward, terminated, truncated, info
         """
         action = np.asarray(action, dtype=np.float32).reshape(-1)
@@ -213,10 +220,17 @@ class PickNavReachEnv:
         if action.size != n:
             raise ValueError(f"Action size {action.size} != controllable dofs {n}")
 
-        action = np.clip(action, -1.0, 1.0)
-        qpos, _ = self._get_state()
+        # action = np.clip(action, -1.0, 1.0)
+        qpos, _, _, _ = self._get_state()
+        print(f"===========================Step {self.step_count}===========================")
+        self.step_count += 1
         print("current qpos: ", qpos)
-        target = qpos + self.action_scale * action
+        # target = qpos + self.action_scale * action
+        # target = np.clip(target, self.joint_lower, self.joint_upper)
+        # print("wrap_mask: ", (self.joint_upper == 314))
+        # print("action: ", action)
+        target = closest_joint_values(action, qpos, wrap_mask=(self.joint_upper == 314))
+        # print("target before clip: ", target)
         target = np.clip(target, self.joint_lower, self.joint_upper)
         print("target: ", target)
 
@@ -257,7 +271,7 @@ class PickNavReachEnv:
     
     def reset(self):
         """Reset the simulation and reload world/robot. Returns initial observation."""
-        self._set_qpos(self.q0)
+        self._set_qpos(self.init_qpos)
         p.resetBasePositionAndOrientation(self.object_id, [0, 0, 5.0], [0, 0, 0, 1])
 
         return self._get_obs()
@@ -276,23 +290,27 @@ class PickNavReachEnv:
         pass
     
     def _get_obs(self):
-        qpos, qvel = self._get_state()
+        qpos, qvel, object_pos, object_xyzw = self._get_state() # （15，）（15,）（3,）（4，）
         object_obs = self._get_object_obs()
 
         # self.visualize_pc_and_normals(object_pc, object_normals, visualize_normals=False)
         return {
             "qpos": deepcopy(qpos),
             "qvel": deepcopy(qvel),
+            "object_pos": deepcopy(object_pos),
+            "object_xyzw": deepcopy(object_xyzw),
             "object_pc": deepcopy(object_obs["object_pc"]),
             "object_normals": deepcopy(object_obs["object_normals"]),
             "cube_positions": deepcopy(self.cube_positions[:, :2]),
         }
 
     def _get_state(self):
-        states = p.getJointStates(self.robot_id, self.joint_indices)
-        qpos = np.array([s[0] for s in states], dtype=np.float32)
-        qvel = np.array([s[1] for s in states], dtype=np.float32)
-        return qpos, qvel
+        agent_states = p.getJointStates(self.robot_id, self.joint_indices)
+        qpos = np.array([s[0] for s in agent_states], dtype=np.float32)
+        qvel = np.array([s[1] for s in agent_states], dtype=np.float32)
+        
+        object_pos, object_xyzw = p.getBasePositionAndOrientation(self.object_id, self.pb_physics_client)
+        return qpos, qvel, np.array(object_pos), np.array(object_xyzw)
 
     def _set_qpos(self, qpos):
         qpos = np.asarray(qpos, dtype=np.float32).reshape(-1)
@@ -307,23 +325,33 @@ class PickNavReachEnv:
 
     @property
     def obs_size(self):
-        # qpos + qvel
-        return 2 * len(self.joint_indices)
+        # obs dict size
+        size_str = "\n"
+        for k, v in self.obs.items():
+            if isinstance(v, np.ndarray):
+                size_str += f"{k}: {type(v)}, {v.shape}\n"
+            else:
+                size_str += f"{k}: {type(v)}\n"
+        return size_str
+
+    @property
+    def agent_qpos(self):
+        qpos, _, _, _ = self._get_state()
+        return qpos.copy()
 
 
 if __name__ == "__main__":
     env = PickNavReachEnv(seed=42)
     env.reset()
-    # print(f"Action size: {env.action_size}, Obs size: {env.obs_size}")
+    print(f"Action size: {env.action_size}, Obs size: {env.obs_size}")
     
     keyboard_controller = KeyBoardController(env)
-
+    
     # for i in range (10000):
     import time
     while True:
         # random_action = np.random.uniform(-1.0, 1.0, size=(env.action_size,))
         action = keyboard_controller.get_action()
-        # print("action: ", action)
         obs, reward, terminated, truncated, info = env.step(action)
         # p.stepSimulation()
         # time.sleep(1./240.)
