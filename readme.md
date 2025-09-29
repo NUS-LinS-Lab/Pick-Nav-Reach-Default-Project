@@ -7,7 +7,7 @@ In this project, the task is to:
 2. Carry the object and navigate the robot through the maze. 
 3. Bring the object to the target position (visualized as the green sphere). 
 
-We provide an environment code for the robot in `pick_nav_reach.py`.
+We provide an environment code for the robot in `pick_nav_reach_env.py`.
 
 ![Scene](imgs/scene.png)
 
