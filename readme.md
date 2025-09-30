@@ -72,19 +72,9 @@ Evaluate on 5 test mazes while carrying the object toward the green goal sphere.
 
     Scoring per trial: reach within 10 cm of the goal sphere while still holding the object → 6 pts.
 
-- Collision Count — 5 pts
+- Carry Stability — 10 pts
 
-    Total contacts with walls/static scene across 5 trials:
-
-    - 0–3 contacts → 5 pts
-
-    - 4–10 → 3 pts
-
-    - \>10 → 0 pts
-
-- Carry Stability — 5 pts
-
-    Scoring per trial: no drop that requires re-grasp during navigation → 1 pt each; sum over 5 trials (max 5).
+    Scoring per trial: no drop that requires re-grasp during navigation → 2 pt each; sum over 5 trials (max 10).
 
 ![Scene](imgs/success_navigation.png)
 
