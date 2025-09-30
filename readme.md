@@ -11,72 +11,6 @@ We provide an environment code for the robot in `pick_nav_reach_env.py`.
 
 ![Scene](imgs/scene.png)
 
-# Requirement
-
-You should implement the grasp generation, motion planning, and navigation algorithms by yourself to accomplish the task.
-
-# Rubric
-
-We evaluate your algorithms in the following three aspects with 5 Unprovided seeds:
-
-- Grasp Generation: 5 test objects.
-
-- Motion Planning: use the grasps produced above.
-
-- Navigation: 5 test mazes.
-
-Unless otherwise stated: placement tolerance = **10 cm**
-
-## Grasp Generation (40%)
-
-Use the **object point cloud and surface normals** to generate grasps.
-
-- Force-Closure Validity — 25 pts
-
-    For each object, take your chosen grasp (e.g., top-1 after your internal scoring) and test force closure using friction cones on the contact pair(s).
-    Scoring per trial: FC passes → 5 pts.
-
-    Notes: Default friction μ = 0.5 unless you document another value.
-
-- Table Feasibility — 10 pts
-
-    Evaluate the fraction of the gripper volume above the table plane (feasible ratio) when executing the grasp from the table top. You may approximate volume via uniform point sampling on the gripper geometry.
-    Scoring per trial: 2 pts * feasible ratio
-
-
-- Visualization — 5 pts
-
-    Provide a clear visualization of generated grasps (e.g., gripper pose, object pose and contact normals/arrows). Scoring: present & clear → 5 pts.
-
-## Motion Planning and Grasping (20%)
-
-From the selected grasps above, perform IK + motion planning to execute pre-grasp → grasp → lift.
-
-For each trial, award the following (sum; then average across trials):
-
-- Lift within 3000 sim steps — 5 pts
-
-- Lift height ≥ 10 cm above table — 5 pts
-
-- Hold stability for ≥ 50 steps — 5 pts
-
-- Final pose close to target grasp — 5 pts
-
-![Scene](imgs/success_grasp.png)
-
-## Navigation (40%)
-
-Evaluate on 5 test mazes while carrying the object toward the green goal sphere.
-
-- Delivery to Goal — 30 pts
-
-    Scoring per trial: reach within 10 cm of the goal sphere while still holding the object → 6 pts.
-
-- Carry Stability — 10 pts
-
-    Scoring per trial: no drop that requires re-grasp during navigation → 2 pt each; sum over 5 trials (max 10).
-
-![Scene](imgs/success_navigation.png)
 
 # Installation
 
@@ -125,6 +59,65 @@ dist_to_goal: <class 'numpy.float64'>, () # < 0.1 means success
 success: <class 'numpy.bool'>, () # success or not
 
 ```
+
+# Requirement
+
+You should implement the grasp generation, motion planning, and navigation algorithms in your customized module by yourselves to accomplish the task.
+
+# Rubrics
+
+We evaluate your algorithms in the following two aspects with 5 Unprovided seeds:
+
+- Pick: 5 test objects (within the provided objects).
+
+- Navigation and Reach: 5 test mazes.
+
+Unless otherwise stated: placement tolerance = **10 cm**
+
+## Pick (62%)
+
+### Grasp Genration 
+
+Use the **object point cloud and surface normals** to generate grasps.
+
+- Function for Grasp Generation - 15 pts
+
+### Motion Planning and Grasping
+
+Use motion planning to execute the generated grasps.
+
+- Function for Motion Planning - 15 pts
+
+For each trial, award the following (sum; then average across trials):
+
+- Lift within 3000 sim steps — 8 pts
+
+- Lift height ≥ 10 cm above table — 8 pts
+
+- Hold stability for ≥ 50 steps — 8 pts
+
+- Final pose close to target grasp — 8 pts
+
+![Scene](imgs/success_grasp.png)
+
+## Navigation and Reach (38%)
+
+Use the maze configuration to navigate and reach the goal.
+
+- Function for Navigation - 10 pts
+
+For each trial, award the following (sum; then average across trials):
+
+- reach within 10 cm of the goal sphere — 10 pts
+
+- reach within 15000 sim steps - 10 pts
+
+- Carry Stability — 8 pts
+
+    no drop that requires re-grasp during navigation → 2 pts each (max 8).
+
+![Scene](imgs/success_navigation.png)
+
 
 # References
 
