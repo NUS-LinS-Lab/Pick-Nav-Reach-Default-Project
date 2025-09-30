@@ -74,45 +74,45 @@ We evaluate your algorithms in the following two aspects with 5 Unprovided seeds
 
 Unless otherwise stated: placement tolerance = **10 cm**
 
-## Pick (62%)
+## Pick (64%)
 
 ### Grasp Genration 
 
 Use the **object point cloud and surface normals** to generate grasps.
 
-- Function for Grasp Generation - 15 pts
+- Function for Grasp Generation - 20 pts
 
 ### Motion Planning and Grasping
 
 Use motion planning to execute the generated grasps.
 
-- Function for Motion Planning - 15 pts
+- Function for Motion Planning - 20 pts
 
 For each trial, award the following (sum; then average across trials):
 
-- Lift within 3000 sim steps — 8 pts
+- Lift within 3000 sim steps — 6 pts
 
-- Lift height ≥ 10 cm above table — 8 pts
+- Lift height ≥ 10 cm above table — 6 pts
 
-- Hold stability for ≥ 50 steps — 8 pts
+- Hold stability for ≥ 50 steps — 6 pts
 
-- Final pose close to target grasp — 8 pts
+- Final pose close to target grasp — 6 pts
 
 ![Scene](imgs/success_grasp.png)
 
-## Navigation and Reach (38%)
+## Navigation and Reach (36%)
 
 Use the maze configuration to navigate and reach the goal.
 
-- Function for Navigation - 10 pts
+- Function for Navigation - 20 pts
 
 For each trial, award the following (sum; then average across trials):
 
-- reach within 10 cm of the goal sphere — 10 pts
+- reach within 10 cm of the goal sphere — 6 pts
 
-- reach within 15000 sim steps - 10 pts
+- reach within 15000 sim steps - 6 pts
 
-- Carry Stability — 8 pts
+- Carry Stability — 4 pts
 
     no drop that requires re-grasp during navigation → 2 pts each (max 8).
 
